@@ -1,6 +1,5 @@
 import whisper
 import torch
-import imageio_ffmpeg as ffmpeg
 import os
 from tqdm import tqdm
 from prompt_toolkit.shortcuts import radiolist_dialog
@@ -8,6 +7,14 @@ from prompt_toolkit.shortcuts import radiolist_dialog
 # Detectar automaticamente se CUDA está disponível
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Usando dispositivo: {device}")
+
+# Caminho do FFmpeg local
+ffmpeg_path = os.path.join(os.path.dirname(__file__), "ffmpeg_bin", "ffmpeg.exe")
+if not os.path.exists(ffmpeg_path):
+    print("Erro: FFmpeg não encontrado no diretório do projeto.")
+    exit()
+os.environ["PATH"] = f"{os.path.dirname(ffmpeg_path)};" + os.environ["PATH"]
+print(f"Usando FFmpeg personalizado: {ffmpeg_path}")
 
 # Opção para escolher o tipo de transcrição
 formato = radiolist_dialog(
@@ -46,10 +53,6 @@ if not idioma_escolhido:
 
 # Carregar o modelo Whisper
 model = whisper.load_model(modelo_escolhido, device=device)
-
-# Usar FFmpeg interno do Python
-ffmpeg_path = ffmpeg.get_ffmpeg_exe()
-print(f"Usando FFmpeg interno: {ffmpeg_path}")
 
 # Função para transcrever com progresso
 def transcrever_com_progresso(model, audio_path, idioma):
