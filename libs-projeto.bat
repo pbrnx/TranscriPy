@@ -38,22 +38,42 @@ if not exist "%REPO_DIR%" (
 
 echo Instalando dependencias do Whisper...
 
-:: Atualizar pip, setuptools e wheel para evitar erros de compilacao
-python -m pip install --upgrade pip setuptools wheel
+:: Atualizar pip, setuptools e wheel apenas se necessario
+pip show pip >nul 2>nul
+if %errorlevel% neq 0 (
+    python -m pip install --upgrade pip setuptools wheel
+)
 
-:: Instalar Whisper diretamente do repositorio oficial
-pip install git+https://github.com/openai/whisper.git
+:: Verificar e instalar Whisper apenas se nao estiver instalado
+pip show whisper >nul 2>nul
+if %errorlevel% neq 0 (
+    echo Instalando Whisper...
+    pip install git+https://github.com/openai/whisper.git
+) else (
+    echo Whisper ja esta instalado.
+)
 
-:: Instalar Torch com suporte a CUDA 11.8
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+:: Verificar e instalar Torch apenas se nao estiver instalado
+pip show torch >nul 2>nul
+if %errorlevel% neq 0 (
+    echo Instalando Torch com suporte a CUDA 11.8...
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+) else (
+    echo Torch ja esta instalado.
+)
 
-:: Instalar dependencias extras necessarias para o Whisper
-pip install prompt_toolkit tqdm imageio-ffmpeg
+:: Verificar e instalar outras dependencias apenas se necessario
+for %%P in (prompt_toolkit tqdm imageio-ffmpeg ffmpeg-python) do (
+    pip show %%P >nul 2>nul
+    if !errorlevel! neq 0 (
+        echo Instalando %%P...
+        pip install %%P
+    ) else (
+        echo %%P ja esta instalado.
+    )
+)
 
-:: Instalar FFmpeg para manipulacao de audio e video
-pip install ffmpeg-python
-
-echo Todas as dependencias foram instaladas com sucesso!
+echo Todas as dependencias foram verificadas e instaladas se necessario!
 
 :: Executar automaticamente o script de transcricao
 echo Iniciando TranscriPy...
