@@ -1,19 +1,52 @@
 import whisper
 import torch
 import os
+import sys
 from tqdm import tqdm
 from prompt_toolkit.shortcuts import radiolist_dialog
+
+# Função para obter o caminho base do projeto
+def get_project_path():
+    if getattr(sys, 'frozen', False):  # Se for um executável PyInstaller
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.abspath(__file__))  # Se for um script Python
+
+# Definir caminhos dentro do projeto
+project_path = get_project_path()
+whisper_assets_path = os.path.join(project_path, "whisper_assets")
+
+# Configura os arquivos de assets manualmente
+gpt2_path = os.path.join(whisper_assets_path, "gpt2.tiktoken")
+mel_filters_path = os.path.join(whisper_assets_path, "mel_filters.npz")
+multilingual_path = os.path.join(whisper_assets_path, "multilingual.tiktoken")
+
+# Verifica se os arquivos existem antes de rodar
+if not all(os.path.exists(path) for path in [gpt2_path, mel_filters_path, multilingual_path]):
+    print("Erro: Os arquivos de assets do Whisper não foram encontrados na pasta local.")
+    exit()
+
+# Forçar o Whisper a usar os assets locais sobrescrevendo os caminhos internos
+whisper.audio.MEL_FILTERS_PATH = mel_filters_path
+whisper.tokenizer.GPT2_TOKENIZER_PATH = gpt2_path
+whisper.tokenizer.MULTILINGUAL_TOKENIZER_PATH = multilingual_path
+
+# Definir variáveis de ambiente explicitamente
+os.environ["WHISPER_ASSETS"] = whisper_assets_path
+os.environ["TOKENIZERS_PARALLELISM"] = "false"  # Evita warnings
+
+# Imprimir caminho para depuração
+print(f"Usando whisper_assets em: {whisper_assets_path}")
 
 # Detectar automaticamente se CUDA está disponível
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Usando dispositivo: {device}")
 
 # Caminho do FFmpeg local
-ffmpeg_path = os.path.join(os.path.dirname(__file__), "ffmpeg_bin", "ffmpeg.exe")
+ffmpeg_path = os.path.join(project_path, "ffmpeg_bin", "ffmpeg.exe")
 if not os.path.exists(ffmpeg_path):
     print("Erro: FFmpeg não encontrado no diretório do projeto.")
     exit()
-os.environ["PATH"] = f"{os.path.dirname(ffmpeg_path)};" + os.environ["PATH"]
+os.environ["PATH"] = f"{os.path.dirname(ffmpeg_path)};{os.environ['PATH']}"
 print(f"Usando FFmpeg personalizado: {ffmpeg_path}")
 
 # Opção para escolher o tipo de transcrição
