@@ -88,22 +88,24 @@ while True:
         print("Erro: O arquivo especificado não existe. Tente novamente.")
 
     try:
-        # Obter nome do arquivo sem extensão
+        # Obter o diretório do arquivo e nome base sem extensão
+        audio_dir = os.path.dirname(audio_path)
         nome_base = os.path.splitext(os.path.basename(audio_path))[0]
-        saida_path = f"{nome_base}.{formato}"
+
+        # Definir o caminho de saída no mesmo diretório do áudio
+        saida_path = os.path.join(audio_dir, f"{nome_base}.{formato}")
 
         # Transcrever o áudio
         result = transcrever_com_progresso(model, audio_path, idioma_escolhido)
 
         # Salvar o arquivo no formato correto
         if formato == "srt":
-            whisper.utils.get_writer("srt", ".")(result, saida_path)
+            whisper.utils.get_writer("srt", audio_dir)(result, saida_path)
         else:
             with open(saida_path, "w", encoding="utf-8") as f:
                 f.write(result["text"])
 
-        print(f"\n Transcrição salva em {saida_path}")
+        print(f"\nTranscrição salva em: {saida_path}")
 
     except Exception as e:
-        print(f" Erro ao transcrever o arquivo: {e}")
-
+        print(f"Erro ao transcrever o arquivo: {e}")
