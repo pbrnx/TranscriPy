@@ -30,9 +30,6 @@ Antes de rodar o **TranscriPy**, certifique-se de ter os seguintes requisitos in
 
 Execute o arquivo .bat para instalar todas as dependências automaticamente. Para funcionar corretamente, é necessário ter o Python e o PIP funcionais.
 
-```bash
-pip install torch whisper tqdm prompt_toolkit
-```
 
 ## Como usar
 
