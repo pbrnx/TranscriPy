@@ -37,9 +37,6 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"  # Evita warnings
 # Imprimir caminho para depuração
 print(f"Usando whisper_assets em: {whisper_assets_path}")
 
-# Detectar automaticamente se CUDA está disponível
-device = "cuda" if torch.cuda.is_available() else "cpu"
-print(f"Usando dispositivo: {device}")
 
 # Caminho do FFmpeg local
 ffmpeg_path = os.path.join(project_path, "ffmpeg_bin", "ffmpeg.exe")
@@ -48,6 +45,12 @@ if not os.path.exists(ffmpeg_path):
     exit()
 os.environ["PATH"] = f"{os.path.dirname(ffmpeg_path)};{os.environ['PATH']}"
 print(f"Usando FFmpeg personalizado: {ffmpeg_path}")
+
+# Detectar automaticamente se CUDA está disponível
+device = "cuda" if torch.cuda.is_available() else "cpu"
+print(f"Usando dispositivo: {device}")
+
+
 
 # Opção para escolher o tipo de transcrição
 formato = radiolist_dialog(
@@ -73,7 +76,7 @@ if not modelo_escolhido:
     exit()
 
 # Opção para escolher o idioma da transcrição
-idiomas = {"en": "Inglês", "es": "Espanhol", "pt": "Português"}
+idiomas = {"en": "Inglês", "es": "Espanhol", "pt": "Português", "auto": "Automático"}
 idioma_escolhido = radiolist_dialog(
     title="Escolha o idioma da transcrição",
     text="Selecione o idioma para a transcrição:",
@@ -84,15 +87,21 @@ if not idioma_escolhido:
     print("Nenhum idioma selecionado. Encerrando.")
     exit()
 
+print("Carregando modelos Whisper na memória. O modelo selecionado foi: ", modelo_escolhido)
 # Carregar o modelo Whisper
 model = whisper.load_model(modelo_escolhido, device=device)
 
-# Função para transcrever com progresso
+
+# Função para transcrever com progresso e detecção automática de idioma
 def transcrever_com_progresso(model, audio_path, idioma):
     """
     Função para transcrever áudio e exibir barra de progresso real.
+    Se idioma for "auto", Whisper detectará automaticamente o idioma.
     """
     print("\nTranscrevendo o áudio...\n")
+
+    # Ajusta o idioma: None ativa a detecção automática no Whisper
+    idioma = None if idioma == "auto" else idioma
 
     # Carregar o áudio
     audio = whisper.load_audio(audio_path)
@@ -100,7 +109,7 @@ def transcrever_com_progresso(model, audio_path, idioma):
 
     # Criar barra de progresso
     with tqdm(total=100, desc="Transcrevendo", bar_format="{l_bar}{bar}| {n:.0f}%") as pbar:
-        # Dividir áudio em segmentos e transcrever
+        # Transcrever o áudio com ou sem idioma fixo
         result = model.transcribe(audio_path, language=idioma, verbose=False)
 
         # Atualizar barra de progresso manualmente
@@ -110,6 +119,7 @@ def transcrever_com_progresso(model, audio_path, idioma):
             pbar.refresh()
 
     return result
+
 
 # Loop principal para processar vários arquivos sem fechar o programa
 while True:
@@ -122,7 +132,6 @@ while True:
         if os.path.exists(audio_path):
             break
         print("Erro: O arquivo especificado não existe. Tente novamente.")
-
     try:
         # Obter o diretório do arquivo e nome base sem extensão
         audio_dir = os.path.dirname(audio_path)
@@ -140,7 +149,6 @@ while True:
         else:
             with open(saida_path, "w", encoding="utf-8") as f:
                 f.write(result["text"])
-
         print(f"\nTranscrição salva em: {saida_path}")
 
     except Exception as e:
