@@ -18,7 +18,7 @@
 
 Antes de rodar o **TranscriPy**, certifique-se de ter os seguintes requisitos instalados:
 
-- **Python 3.8+**
+- **Python 3.8+ (Recomendo a 3.11)**
 - **pip** atualizado
 - **FFmpeg** (incluso no projeto)
 - **PyTorch** (com suporte a CUDA, se disponível)
@@ -28,7 +28,7 @@ Antes de rodar o **TranscriPy**, certifique-se de ter os seguintes requisitos in
 
 ### Instalando dependências
 
-Execute o comando abaixo para instalar todas as dependências necessárias:
+Execute o arquivo .bat para instalar todas as dependências automaticamente. Para funcionar corretamente, é necessário ter o Python e o PIP funcionais.
 
 ```bash
 pip install torch whisper tqdm prompt_toolkit
