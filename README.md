@@ -2,7 +2,7 @@
 
 ## Sobre o projeto
 
-**TranscriPy** é uma aplicação CLI para transcrição de áudio baseada no modelo **Whisper** da OpenAI. Ela permite que você converta arquivos de áudio em texto de forma rápida e precisa, suportando vários idiomas e formatos de saída, como **TXT** e **SRT**.
+**TranscriPy** é uma aplicação CLI (pretendo adicionar um frontend em breve, contribuições são bem-vindas!) para transcrição de áudio baseada no modelo **Whisper** da OpenAI. Ela permite que você converta arquivos de áudio em texto de forma rápida e precisa, suportando vários idiomas e formatos de saída, como **TXT** e **SRT**.
 
 ## Funcionalidades
 
