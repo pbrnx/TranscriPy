@@ -31,7 +31,9 @@ Antes de rodar o **TranscriPy**, certifique-se de ter os seguintes requisitos in
 Execute o arquivo .bat para instalar todas as dependências automaticamente. Para funcionar corretamente, é necessário ter o Python e o PIP funcionais.
 
 pip install git+https://github.com/openai/whisper.git
+
 pip install tqdm prompt_toolkit
+
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
 
